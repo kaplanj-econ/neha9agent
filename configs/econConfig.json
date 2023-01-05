@@ -1,0 +1,19 @@
+{
+    "planningLength": 91,
+    "freshYield": 0.8623,
+    "juiceYield": 0.0,
+    "freshPrice": 1,
+    "juicePrice": 0.0,
+    "costs": 0,
+    "biologicalRun": false,
+    "projectionLength": 3600,
+    "outputFilename": "econ_output.csv",
+    "harvestDays":"100,200,300",
+    "strategyParameters":"3,0,30,40,0.1,0.1,5,5,0;3,0,30,40,0.1,0.1,5,5,0;3,0,30,40,0.1,0.1,5,5,0;3,0,30,40,0.1,0.1,5,5,0;3,0,30,40,0.1,0.1,5,5,0;3,0,30,40,0.1,0.1,5,5,0;3,0,30,40,0.1,0.1,5,5,0;3,0,30,40,0.1,0.1,5,5,0;3,0,30,40,0.1,0.1,5,5,0",
+    "strategyFlags":"1,0,0,0;1,0,0,0;1,0,0,0;1,0,0,0;1,0,0,0;1,0,0,0;1,0,0,0;1,0,0,0;1,0,0,0",
+    "agencyFlags":"1",
+    "experimentID": -1,
+    "agentsbankinfo":"0,0;1,0;2,0;3,0;4,0;5,0;6,0;7,0;8,0",
+    "memorylength": 5,
+    "memoryvalue": 50
+}

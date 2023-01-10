@@ -40,9 +40,10 @@ string strategyParameters;
 string strategyFlags; 
 string agentsbankinfo;
 string agencyFlags;
-double memorylength;
 double memoryvalue;
 int experimentID;
+int memorylength = ParameterSet::parammemorylength;
+double memorylengthyear[ParameterSet::parammemorylength];
 
 boost::random::mt19937 econ_rng(std::time(0));
 boost::random::uniform_01<> econ_gen;
@@ -506,18 +507,44 @@ void Phase5() {
             }
         }
 
-        //
+        // Storing the information in the grovers bank and calculating the memory length
 
         double meanSeverity = getMeanHLB(agents[i][j]);
-        agentsinfo[i][j].setgroverbankparameters((agents[i][j].returns - agents[i][j].costs),meanSeverity,"Spray");
+
+        /*
+        This is used when we have multiple behaviour type
+        
+        stringstream strategyNames;
+        for (int k = 0; k < agents[i][j].behaviorPatterns.size(); k++) {
+                    strategyNames << agents[i][j].behaviorPatterns[k]->getName();
+                    if (k != agents[i][j].behaviorPatterns.size() - 1) {
+                        strategyNames << "-";
+                    }
+        }
+        agentsinfo[i][j].setgroverbankparameters((agents[i][j].returns - agents[i][j].costs),meanSeverity,strategyNames.str());*/
+
+
+        agentsinfo[i][j].setgroverbankparameters((agents[i][j].returns - agents[i][j].costs),meanSeverity, agents[i][j].behaviorPatterns[0]->getName());
 
          if( (bioABM::getModelDay()%365) == 0)
            {
+                int year = bioABM::getModelDay()/365;
+                memorylengthyear[year-1] = (agents[i][j].returns - agents[i][j].costs);
                 double valuefunction = 0;
-                if(bioABM::getModelDay()/365 < memorylength)
+                if(year < memorylength)
+                {
                    valuefunction = ((memorylength-(bioABM::getModelDay()/365)) * memoryvalue) + (agents[i][j].returns - agents[i][j].costs);
-                else  
-                    valuefunction = (agents[i][j].returns - agents[i][j].costs) ;
+                }
+                else if(year == memorylength) 
+                {
+                    valuefunction = (agents[i][j].returns - agents[i][j].costs);
+                }
+                else
+                {
+                    valuefunction = memorylengthyear[year-1] - memorylengthyear[year-memorylength-1];
+                }
+
+                //cout <<year-1<<"~~"<<year<<"~~"<< memorylengthyear[year-1] << "~~" << valuefunction << "~~" << (agents[i][j].returns - agents[i][j].costs) << endl;
                 
                 agents[i][j].setValuefunction(valuefunction);
            }
@@ -663,7 +690,7 @@ void parseParameterFile(string fileName) {
         archive(ParameterSet::planningLength, ParameterSet::freshYield, ParameterSet::juiceYield,
             ParameterSet::freshPrice, ParameterSet::juicePrice, ParameterSet::costs, ParameterSet::biologicalRun,
             ParameterSet::projectionLength, outputFilename, harvestDays, strategyParameters, strategyFlags, agencyFlags, experimentID,agentsbankinfo,
-            memorylength,memoryvalue);
+           memoryvalue);
     }
     catch (exception e) {
         cout << "ERROR WITH ECON JSON:" << e.what() << endl;

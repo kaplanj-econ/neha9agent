@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "queue": "cpp",
+        "random": "cpp",
+        "stack": "cpp",
+        "*.ipp": "cpp",
+        "ios": "cpp",
+        "iosfwd": "cpp",
+        "vector": "cpp"
+    }
+}

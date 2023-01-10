@@ -23,6 +23,7 @@ namespace ParameterSet {
     int rogueRadius = 1; //Radius of adjacent trees removed when infected one found
     int rogueFrequency = 20; // Frequency that rogueing is checked
     double groupPremium = 5;
+    const int parammemorylength = 5; // Memory length value
     //Trust in extension agent
     double g00_lambda = 0.5;
     double g01_lambda = 0.5;

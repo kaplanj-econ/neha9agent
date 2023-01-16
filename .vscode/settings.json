@@ -6,6 +6,8 @@
         "*.ipp": "cpp",
         "ios": "cpp",
         "iosfwd": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "string": "cpp",
+        "iostream": "cpp"
     }
 }

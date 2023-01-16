@@ -44,6 +44,8 @@ double memoryvalue;
 int experimentID;
 int memorylength = ParameterSet::parammemorylength;
 double memorylengthyear[ParameterSet::parammemorylength];
+Commodity cropvalue = Commodity();
+
 
 boost::random::mt19937 econ_rng(std::time(0));
 boost::random::uniform_01<> econ_gen;
@@ -199,6 +201,99 @@ void InitialiseCHMA(Commodity crop) {
 *************************************************************/
 void Phase1() {
     bioABM::advanceBiologicalModel();
+}
+
+/*************************************************************
+* Phase 1.1
+* Change the grovers behavior type if the current practice of grover is not profitable
+*************************************************************/
+void ChangeGroverBehaviorType(Commodity crop) {
+
+    int period_t = bioABM::getModelDay();
+
+
+    if(period_t == 100)
+    {
+
+        vector<string> sParams = split(strategyParameters, ";");
+        vector<string> sFlags = split(strategyFlags, ";");
+        vector<string> agencyParams = split(agencyFlags, ";");
+        vector<string> sagentsbankinfo = split(agentsbankinfo,";");
+    
+        int latticeRows = bioABM::getNumRows();
+        int latticeCols = bioABM::getRowLength();
+        int cropRowSize = latticeRows / ParameterSet::gridLength;
+        int cropColSize = latticeCols / ParameterSet::gridWidth;
+        int k =0;   
+        for (int i = 0; i < ParameterSet::gridLength; i++) {
+
+            for(int j=0; j<ParameterSet::gridWidth;j++){
+            //Create grove
+
+                    if (i==0 && j==1)
+                    {
+                        int i_lb = (i / ParameterSet::gridLength) * cropRowSize;
+                        int i_ub = i_lb + cropRowSize;
+                        int j_lb = (i % ParameterSet::gridLength) * cropColSize;
+                        int j_ub = j_lb + cropColSize;
+                        bool agency = (stoi(agencyParams[0]) == 1);
+
+
+                        //Create and assign strategy vector
+                        vector<string> sFlags_agent = split(sFlags[k], ",");
+                        vector<string> sParams_agent = split(sParams[k], ",");
+                        vector<string> ssagentsbankinfo = split(sagentsbankinfo[k], ",");
+                        k = k+1;
+                    
+                        agents[i][j] = Grove(crop, agency, i_lb, i_ub, j_lb, j_ub);
+
+                    
+                        //Rogue trees
+                       /* if (stoi(sFlags_agent[0]) == 1) {
+                        agentsinfo[i][j] = Groversbank(stod(ssagentsbankinfo[0]),stod(ssagentsbankinfo[1]),"Rogue");
+                            agents[i][j].behaviorPatterns.push_back(new RogueTrees(stod(sParams_agent[0]),
+                                                                                stod(sParams_agent[1]),
+                                                                                stod(sParams_agent[2]),
+                                                                                stod(sParams_agent[3]),
+                                                                                stod(sParams_agent[4]))
+                                                                );
+                        }*/
+
+                            
+                        //Spraying
+                       // if (stoi(sFlags_agent[1]) == 0) {
+                        agentsinfo[i][j] = Groversbank(stod(ssagentsbankinfo[0]),stod(ssagentsbankinfo[1]),"Spray");
+                            Behavior* spray = new SprayTrees(stod(sParams_agent[5]),
+                                                            stod(sParams_agent[6]),
+                                                            bioABM::getSpringStart(),
+                                                            bioABM::getSummerStart(),
+                                                            bioABM::getFallStart());
+
+                    
+                         agents[i][j].behaviorPatterns.clear();
+                            
+                         agents[i][j].behaviorPatterns.push_back(spray);
+                             cout<< 1 << endl;    
+                            agents[i][j].behaviorPatterns[0]->PlanActions();
+                       // }
+                                
+                   
+                    }
+            }
+        }
+
+      
+        //Initial logging and planning
+       /* for (int i = 0; i < ParameterSet::gridLength ; i++) { 
+            for(int j=0; j<ParameterSet::gridWidth;j++){
+                for (int k = 0; k < agents[i][j].behaviorPatterns.size(); k++) {
+                    agents[i][j].behaviorPatterns[k]->PlanActions();
+                }
+            }
+        }*/
+    }
+    return;
+
 }
 
 /*************************************************************
@@ -543,7 +638,7 @@ void Phase5() {
                 {
                     valuefunction = memorylengthyear[year-1] - memorylengthyear[year-memorylength-1];
                 }
-
+                
                 //cout <<year-1<<"~~"<<year<<"~~"<< memorylengthyear[year-1] << "~~" << valuefunction << "~~" << (agents[i][j].returns - agents[i][j].costs) << endl;
                 
                 agents[i][j].setValuefunction(valuefunction);
@@ -650,6 +745,7 @@ void writeCSVLine() {
 * complete
 **************************************************************/
 void runModel() {
+    
     while (bioABM::getModelDay() <= bioABM::getModelDuration()) {
         // Stage 1: Psyllid Growth and Movement
         Phase1();
@@ -659,6 +755,11 @@ void runModel() {
             if (bioABM::getModelDay() % ParameterSet::planningLength == 0) {
               //cout << "Planning period!\n";
             }
+
+            //cout<< bioABM::getModelDay()<<endl;
+            // Stage 1.1 : Change of the grovers behaviour type
+            ChangeGroverBehaviorType(cropvalue);
+
             // Stage 2: Execution of Planned Actions
             Phase2();
              
@@ -754,10 +855,10 @@ int main(int argc, char ** argv) {
     outputFile
         << fixed << "t,id,costs,returns,profit,hlb_severity,strategy_names, strategy_params, experiment_id" << endl;
 
+    cropvalue = getCommodity();
     InitialiseCHMA(getCommodity());
    
     runModel();
     
-
     return 0;
 }

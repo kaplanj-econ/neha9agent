@@ -1,4 +1,4 @@
-#include "../headers/Groversbank.hpp"
+#include "../headers/groversbank.hpp"
 
 
 Groversbank::Groversbank() {
